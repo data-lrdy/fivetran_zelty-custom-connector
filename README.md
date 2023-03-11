@@ -5,7 +5,7 @@ This repository contains Python code that uses the requests library to retrieve 
 To use the code, first clone this repository:
 
 ```bash
-git clone https://github.com/username/repository.git
+git clone https://github.com/data-lrdy/fivetran_zelty-custom-connector.git
 ```
 
 Then, install the necessary dependencies:
