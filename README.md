@@ -49,4 +49,4 @@ orders = orders_json['orders']
 This will retrieve data for all tags and orders from '2023-02-01', and return the data in JSON format.
 
 ## Credits
-This code was written by [Your Name].
+This code was written by Louis Raverdy.
