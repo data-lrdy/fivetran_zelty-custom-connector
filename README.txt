@@ -1,2 +1,6 @@
-#!/bin/bash
-echo "Hello, World!"
+```
+def hello_world():
+    print("Bonjour, Monde!")
+
+hello_world()
+```
