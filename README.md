@@ -13,7 +13,7 @@ Then, install the necessary dependencies:
 ```bash
 pip install requests
 ```
-# Usage
+## Usage
 The main code of this repository can be found in the zelty_api.py file. This file contains the function get_data(table, headers), which retrieves data for a given table from the Zelty API endpoint. The function takes two parameters:
 
 table: a string that specifies the name of the table to retrieve data from.
@@ -22,17 +22,18 @@ The get_data function uses a GET request to retrieve data from the API endpoint,
 
 There is also a function called get_menus(headers) which is used to retrieve menu data from the API endpoint. This function takes only the headers parameter, and retrieves data from the "menus" table.
 
-Example
+## Example
 Here's an example of how to use the get_data function to retrieve data from the "users" table:
 
-python
-Copy code
+```python
 import requests
 from zelty_api import get_data
 
 headers = {"Authorization": "Bearer <YOUR_ACCESS_TOKEN>"}
 users_data = get_data("users", headers)
+``` 
+
 This will retrieve data for all users from the API endpoint, and return the data in JSON format.
 
-Credits
+## Credits
 This code was written by [Your Name].
