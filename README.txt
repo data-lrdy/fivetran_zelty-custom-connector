@@ -4,9 +4,8 @@ This repository contains Python code that uses the requests library to retrieve 
 ##Installation
 To use the code, first clone this repository:
 
-echo '```bash
-# Votre code ici
-```' >> README.md
+#!/bin/bash
+echo "Hello, World!"
 
 ```python
 git clone https://github.com/username/repository.git
