@@ -4,11 +4,14 @@ This repository contains Python code that uses the requests library to retrieve 
 ##Installation
 To use the code, first clone this repository:
 
+echo '```bash
+# Votre code ici
+```' >> README.md
+
 ```python
 git clone https://github.com/username/repository.git
+
 Then, install the necessary dependencies:
-
-
 
 pip install requests
 Usage
