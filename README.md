@@ -14,26 +14,35 @@ Then, install the necessary dependencies:
 pip install requests
 ```
 ## Usage
-The main code of this repository can be found in the zelty_api.py file. This file contains the function get_data(table, headers), which retrieves data for a given table from the Zelty API endpoint. The function takes two parameters:
+The main code of this repository can be found in the api_requests.py file. This file contains the function get_data(table, headers), which retrieves data for a given table from the Zelty API. The function takes two parameters:
 
 table: a string that specifies the name of the table to retrieve data from.
 headers: a dictionary that contains the necessary authorization headers to access the API endpoint.
 The get_data function uses a GET request to retrieve data from the API endpoint, and returns the data in JSON format.
 
-There is also a function called get_menus(headers) which is used to retrieve menu data from the API endpoint. This function takes only the headers parameter, and retrieves data from the "menus" table.
+There is also other bigger functions called 
+- get_menus
+- get_orders
+- get_closures
+- get_customers
+- get_options
+- get_restaurants
+
+which are used to retrieve data with pagination system. The functions takes only the headers parameter, and retrieves data from the entities already specified in the functions. Some of them take an additional parameter since, which indicates the last row retreived from the previous API call.
 
 ## Example
 Here's an example of how to use the get_data function to retrieve data from the "users" table:
 
 ```python
 import requests
-from zelty_api import get_data
+from functions.api_requests import get_data, get_menus
 
 headers = {"Authorization": "Bearer <YOUR_ACCESS_TOKEN>"}
-users_data = get_data("users", headers)
+tags = get_data(table="tags", headers=headers)
+orders = get_orders(since='2023-02-01', headers=headers)
 ``` 
 
-This will retrieve data for all users from the API endpoint, and return the data in JSON format.
+This will retrieve data for all tags and orders from '2023-02-01', and return the data in JSON format.
 
 ## Credits
 This code was written by [Your Name].
