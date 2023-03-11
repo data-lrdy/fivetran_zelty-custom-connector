@@ -17,4 +17,3 @@ headers = {'Authorization': f"Bearer {KEY}"}
 
 # Call the get_menus function with the headers
 data = get_menus(headers)
-print(data)
