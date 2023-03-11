@@ -9,6 +9,7 @@ git clone https://github.com/username/repository.git
 Then, install the necessary dependencies:
 
 
+
 pip install requests
 Usage
 The main code of this repository can be found in the zelty_api.py file. This file contains the function get_data(table, headers), which retrieves data for a given table from the Zelty API endpoint. The function takes two parameters:
