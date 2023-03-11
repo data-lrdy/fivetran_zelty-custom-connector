@@ -28,7 +28,7 @@ There is also other bigger functions called
 - get_options
 - get_restaurants
 
-which are used to retrieve data with pagination system. The functions takes only the headers parameter, and retrieves data from the entities already specified in the functions. Some of them take an additional parameter since, which indicates the last row retreived from the previous API call.
+which are used to retrieve data with pagination system. The function only accepts the "headers" parameter and retrieves data from the entities that have already been specified within the function. Certain entities may require an additional parameter "since", which indicates the last row retrieved from the preceding API call.
 
 ## Example
 Here's an example of how to use the get_data function to retrieve data from the "users" table:
