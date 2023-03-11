@@ -7,7 +7,6 @@ To use the code, first clone this repository:
 ```bash
 git clone https://github.com/username/repository.git
 Then, install the necessary dependencies:
-```
 
 
 pip install requests
