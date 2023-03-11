@@ -35,11 +35,15 @@ Here's an example of how to use the get_data function to retrieve data from the 
 
 ```python
 import requests
-from functions.api_requests import get_data, get_menus
+from functions.api_requests import get_data, get_orders
 
 headers = {"Authorization": "Bearer <YOUR_ACCESS_TOKEN>"}
+
+# Tags
 tags = get_data(table="tags", headers=headers)
-orders = get_orders(since='2023-02-01', headers=headers)
+# Orders
+orders_json = get_orders(since='2023-02-01', headers=headers)
+orders = orders_json['orders']
 ``` 
 
 This will retrieve data for all tags and orders from '2023-02-01', and return the data in JSON format.
