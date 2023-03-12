@@ -6,7 +6,7 @@ import pandas as pd
 import calendar
 from functions.utils import clean_dict_list, id_generator
 
-
+########## SM TABLES ###########
 def get_data(table, headers):
 
     # Send a GET request to the API endpoint with the headers
@@ -40,7 +40,7 @@ def get_data(table, headers):
                 return result
 
 ########## MENUS ###########
-def get_menus(headers):
+def get_menus():
 
     table = "menus"
 
@@ -93,11 +93,18 @@ def get_menus(headers):
         menu_hours_add_id = 0
         menu_parts_dishes_add_id = 0
 
+        useless_menus_keys = [
+            'parts',
+            'enable_hours',
+            'tags',
+            'meta'
+        ]
+
         # Loop through each menu in the `menus_raw` list
         for menu in menus_raw:
             # Extract the relevant data from the current menu, and append it to the `menus` list as a dictionary
             menus.append({
-                **{key: menu[key] for key in menu.keys() if key not in ['parts']},
+                **{key: menu[key] for key in menu.keys() if key not in useless_menus_keys},
             })
 
             # Sometimes hours are missing
@@ -435,6 +442,7 @@ def get_customers(since, headers):
             "last_update": last_update
             }
 
+########## CLOSURES ###########
 def get_closures(since, headers):
 
     table = "closures"
@@ -533,7 +541,8 @@ def get_closures(since, headers):
         }
 
 ########## ORDERS ###########
-def get_orders(since, headers):
+
+def get_orders(since):
     table = "orders"
 
     if since:
@@ -664,7 +673,8 @@ def get_orders(since, headers):
         useless_order_keys = [
         'price',
         'items',
-        'transactions'
+        'transactions',
+        'customer'
         ]
 
         items_keys = [
@@ -688,7 +698,8 @@ def get_orders(since, headers):
 
             #print("Since:", last_date, "/ created_at: ",order['created_at'])
             orders.append({
-                **{key: order[key] for key in order.keys() if key not in useless_order_keys}
+                **{key: order[key] for key in order.keys() if key not in useless_order_keys},
+                'customer_id': order['customer']['id'] if order.get('customer') else None
             })
             # Get list of all create dates
             order_dates.append(order['created_at'])
@@ -813,3 +824,4 @@ def get_orders(since, headers):
             'last_order': max(order_dates),
             'has_more': has_more
                 }
+
