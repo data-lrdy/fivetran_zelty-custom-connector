@@ -40,7 +40,7 @@ def get_data(table, headers):
                 return result
 
 ########## MENUS ###########
-def get_menus():
+def get_menus(headers):
 
     table = "menus"
 
@@ -352,7 +352,7 @@ def get_restaurants(headers):
         }
 
 ########## CUSTOMERS ###########
-def get_customers(since, headers):
+def get_customers(since, headers, intial_sync_date):
 
     table = "customers"
 
@@ -362,7 +362,7 @@ def get_customers(since, headers):
         from_date = date_obj.strftime("%Y-%m-%d")
 
     else:
-        from_date = "2023-02-15"
+        from_date = intial_sync_date
         last_date = from_date
 
     # Define variables for pagination and JSON data storage
@@ -443,7 +443,7 @@ def get_customers(since, headers):
             }
 
 ########## CLOSURES ###########
-def get_closures(since, headers):
+def get_closures(since, headers, intial_sync_date):
 
     table = "closures"
 
@@ -463,7 +463,7 @@ def get_closures(since, headers):
             
     # Use this date if no "since" argument is passed        
     else:
-        from_date = "2023-02-15"
+        from_date = intial_sync_date
         last_date = from_date
 
     # Define variables for pagination and JSON data storage
@@ -541,8 +541,7 @@ def get_closures(since, headers):
         }
 
 ########## ORDERS ###########
-
-def get_orders(since):
+def get_orders(since, since_id, headers, intial_sync_date):
     table = "orders"
 
     if since:
@@ -551,8 +550,10 @@ def get_orders(since):
         from_date = date_obj.strftime("%Y-%m-%d")
 
     else:
-        from_date = "2023-02-15"
+        from_date = intial_sync_date
         last_date = from_date
+
+    last_order_id = since_id if since_id else None
 
     # Create a list of dates from input date to (today - 1 day), in yyyy-mm-dd format
     first_days = pd.date_range(from_date, end=datetime.datetime.today() - timedelta(days=1), freq='D').strftime('%Y-%m-%d').tolist()
@@ -662,13 +663,12 @@ def get_orders(since):
         # Create empty lists for the different categories of orders
         orders = []
         order_dates = []
+        order_ids = []
         order_prices = []
         order_price_discounts = []
         order_transactions = []
         order_items = []
-        order_items_prices = []
         order_items_modifiers = []
-        order_items_modifiers_prices = []
 
         useless_order_keys = [
         'price',
@@ -677,41 +677,30 @@ def get_orders(since):
         'customer'
         ]
 
-        items_keys = [
-            'name',
-            'type',
-            'item_id',
-            'price',
-            'modifiers'
-        ]
-
         order_transactions_keys = [
             "device_id",
             "price",
             "date",
             "method"
         ]
+        # Avoid processing existing orders
+        # Keep only the ids > than the last order id
+        if last_order_id:
+            orders_raw = [i for i in orders_raw if i['id'] > last_order_id]
 
         # Loop through each order in the list of orders
         for order in orders_raw:
-            #if from_date < order['created_at']:
-
-            #print("Since:", last_date, "/ created_at: ",order['created_at'])
             orders.append({
                 **{key: order[key] for key in order.keys() if key not in useless_order_keys},
+                'final_amount_exc_tax': order['price']['final_amount_exc_tax'] if order.get('price') else None,
+                'final_amount_inc_tax': order['price']['final_amount_inc_tax'] if order.get('price') else None,
+                
+                # Ajouter l'identifiant du client s'il existe
                 'customer_id': order['customer']['id'] if order.get('customer') else None
             })
+
             # Get list of all create dates
             order_dates.append(order['created_at'])
-
-
-            ### Extracting order prices ###
-            
-            # Create a dictionary to hold the order price information and append it to the list of order prices
-            order_prices.append({
-                'order_id': order['id'],
-                **{key: order['price'][key] for key in order['price'].keys() if key not in ['discounts']}
-            })
 
             ### Extracting order price discounts ###
 
@@ -746,35 +735,16 @@ def get_orders(since):
 
             # If the items exist
             if order['items'] is not None:
-                
-                ### Extracting order items ###
-                
-                # For each item in the order
                 for item in order['items']:
-                    # create a dictionary to hold the item information
-                    row = {
-                        'item_id': item.get('item_id', None),
-                        'order_id': order['id']
-                    }
-                    
-                    # add other keys to the dictionary
-                    for key in [k for k in items_keys if k not in ['item_id', 'price', 'modifiers']]:
-                        row[key] =  item.get(key, None)
-                    
-                    # add the new dictionary to the list of order items
-                    order_items.append(row)
 
-                    ### Extracting order items price ###
-                    
-                    # create a dictionary to hold the item price information
-                    order_items_prices.append({
-                        'item_id': item['item_id'],
+                    order_items.append({
+                        **{key: item[key] for key in item.keys() if key not in ['discounts', 'price', 'modifiers']},
                         'order_id': order['id'],
                         **{key: item['price'][key] for key in item['price'].keys() if key not in ['tax']}
                     })
 
                     ### Extracting order item modifiers ###
-                    
+            
                     # If the item has modifiers
                     if item['modifiers'] is not None:
                         # For each modifier of the item
@@ -784,44 +754,24 @@ def get_orders(since):
                                 'item_id': item['item_id'],
                                 'order_id': order['id'],
                                 **{key: modifier[key] for key in modifier.keys() if key not in ['price', 'modifiers']},
+                                **{key: modifier['price'][key] for key in modifier['price'].keys() if key not in ['tax']},
+                                'tax_amount': modifier['price']['tax']['tax_amount'] if modifier['price'].get('tax') else None,
+                                'tax_rate': modifier['price']['tax']['tax_rate'] if modifier['price'].get('tax') else None
                             })
-
-                            ### Extracting order item modifier price ###
-                            
-                            # If the modifier has a tax
-                            if 'tax' in modifier['price']:
-                                # create a dictionary to hold the modifier price information
-                                order_items_modifiers_prices.append({
-                                    'modifier_id': modifier['id'],
-                                    'item_id': item['item_id'],
-                                    'order_id': order['id'],
-                                    **{key: modifier['price'][key] for key in modifier['price'].keys() if key not in ['tax']},
-                                    'tax_amount': modifier['price']['tax']['tax_amount'],
-                                    'tax_rate': modifier['price']['tax']['tax_rate']
-                                })
-                            
-                            # If the modifier does not have a tax
-                            else:
-                                # create a dictionary to hold the modifier price information
-                                order_items_modifiers_prices.append({
-                                    'modifier_id': modifier['id'],
-                                    'item_id': item['item_id'],
-                                    'order_id': order['id'],
-                                    **{key: modifier['price'][key] for key in modifier['price'].keys() if key not in ['tax']},
-                                    'tax_amount': None,
-                                    'tax_rate': None
-                                })
-
+                  
+        
         return {
             'orders': orders,
             'order_prices': order_prices,
             'order_price_discounts': order_price_discounts,
             'order_transactions': order_transactions,
             'order_items': order_items,
-            'order_items_prices': order_items_prices,
             'order_items_modifiers': order_items_modifiers,
-            'order_items_modifiers_prices': order_items_modifiers_prices,
-            'last_order': max(order_dates),
+            'last_order': {
+                'date': max(order_dates) if order_dates else from_date,
+                'id': max(order_ids) if order_ids else last_order_id
+            },
             'has_more': has_more
                 }
+
 
